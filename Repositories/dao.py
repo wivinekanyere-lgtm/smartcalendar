@@ -23,7 +23,7 @@ class DAO:
         # 1. Création de la table Users sur base de la classe UserDTO
 
         cursor.execute(
-            "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, role TEXT, email TEXT, google_linked BOOLEAN)"
+            "CREATE TABLE IF NOT EXISTS users (id INTEGER PRIMARY KEY, role TEXT, email TEXT, logedin BOOLEAN)"
         )
 
         # 2. Création de la table Etudiant
@@ -59,15 +59,13 @@ class UserDAO(DAO):
     def get_by_id(self, id: int) -> Optional[UserDTO]:
         cursor = self.conn.cursor()
         # Requete de récupération d'un utilisateur par son ID
-        cursor.execute(
-            "SELECT id, role, email, google_linked FROM users WHERE id = ?", (id,)
-        )
-        id_user, role, email, google_linked = cursor.fetchone()
+        cursor.execute("SELECT id, role, email, logedin FROM users WHERE id = ?", (id,))
+        id_user, role, email, logedin = cursor.fetchone()
 
         if not id_user:
             return None
 
-        return UserDTO(id_user, role, email, google_linked)
+        return UserDTO(id_user, role, email, logedin)
 
     def get_all(self) -> List[UserDTO]:
         cursor = self.conn.cursor()
@@ -88,23 +86,23 @@ class UserDAO(DAO):
             )
         )
         cursor.execute(
-            "INSERT INTO users (id, role, email, google_linked) VALUES (?, ?, ?, ?)",
-            (auto_id, user.role, user.email, user.google_linked),
+            "INSERT INTO users (id, role, email, logedin) VALUES (?, ?, ?, ?)",
+            (auto_id, user.role, user.email, user.logedin),
         )
         self.conn.commit()
         return cursor.lastrowid
 
     def update(self, user: UserDTO) -> int | None:
         cursor = self.conn.cursor()
-        role, email, google_linked, id = (
+        role, email, logedin, id = (
             user.role,
             user.email,
-            user.google_linked,
+            user.logedin,
             user.id_user,
         )
         cursor.execute(
-            "UPDATE users SET role = ? , email = ? , google_linked = ? WHERE id = ?",
-            (role, email, google_linked, id),
+            "UPDATE users SET role = ? , email = ? , logedin = ? WHERE id = ?",
+            (role, email, logedin, id),
         )
         self.conn.commit()
         return cursor.lastrowid
